@@ -60,12 +60,6 @@ export const auth = {
     }, false),
 
   me: () => request<AuthResponse["user"]>("/auth/me"),
-
-  google: (supabaseToken: string) =>
-    request<AuthResponse["user"]>("/auth/google", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${supabaseToken}` },
-    }, false),
 };
 
 // ── Pre-auth uploads (fired immediately after login) ─────────────────────────
