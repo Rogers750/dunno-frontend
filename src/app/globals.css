@@ -42,7 +42,7 @@
 
 /* ── Reset & Base ──────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; } /* controlled via data-scroll-behavior on <html> */
 
 body {
   background: var(--surface);

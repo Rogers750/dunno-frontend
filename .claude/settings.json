@@ -4,7 +4,10 @@
       "Bash(git remote *)",
       "Bash(git -C /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend status)",
       "Bash(git -C /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend --no-optional-locks status)",
-      "Bash(git -C /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend rev-parse --show-toplevel)"
+      "Bash(git -C /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend rev-parse --show-toplevel)",
+      "Bash(npm uninstall *)",
+      "Bash(sed -i '' 's/<Github size={14} \\\\/>/<GithubIcon size={14} \\\\/>/g; s/<Github size={18} \\\\/>/<GithubIcon size={18} \\\\/>/g; s/<Linkedin size={18} \\\\/>/<LinkedinIcon size={18} \\\\/>/g; s/<Twitter size={18} \\\\/>/<TwitterIcon size={18} \\\\/>/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/templates/DarkGlassTemplate.tsx)",
+      "Bash(sed -i '' 's/<Github size={14} \\\\/>/<GithubIcon size={14} \\\\/>/g; s/<Github size={18} \\\\/>/<GithubIcon size={18} \\\\/>/g; s/<Linkedin size={17} \\\\/>/<LinkedinIcon size={17} \\\\/>/g; s/<Linkedin size={18} \\\\/>/<LinkedinIcon size={18} \\\\/>/g; s/<Twitter size={17} \\\\/>/<TwitterIcon size={17} \\\\/>/g; s/<Twitter size={18} \\\\/>/<TwitterIcon size={18} \\\\/>/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/templates/CreativeTemplate.tsx)"
     ]
   }
 }

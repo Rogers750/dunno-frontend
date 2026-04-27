@@ -1,64 +1,102 @@
 import { notFound } from "next/navigation";
+import { cookies } from "next/headers";
 import type { Metadata } from "next";
-import { portfolio, type Portfolio } from "@/lib/api";
-import SoftwareTemplate from "@/components/portfolio/SoftwareTemplate";
+import type { Portfolio, Repo } from "@/lib/api";
+import { adaptGeneratedContent, TEMPLATE_FROM_BACKEND, type TemplateId } from "@/lib/portfolioTypes";
+import PortfolioClient from "@/components/portfolio/PortfolioClient";
 
-interface Props {
-  params: Promise<{ username: string }>;
+const BASE = "https://dunno-backend-production.up.railway.app";
+
+interface StoredUser { username: string; email: string; status: string }
+type RawPortfolio = Portfolio & { user?: { username: string; name?: string; email?: string; github_url?: string } };
+
+async function fetchPublic(username: string): Promise<RawPortfolio | null> {
+  try {
+    const res = await fetch(`${BASE}/portfolio/${username}`, { cache: "no-store" });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
 }
 
-const COLOR_MAP: Record<string, string> = {
-  indigo: "#818cf8",
-  emerald: "#34d399",
-  amber: "#fbbf24",
-  rose: "#fb7185",
-  sky: "#38bdf8",
-  slate: "#94a3b8",
-};
+async function fetchOwn(token: string): Promise<Portfolio | null> {
+  try {
+    const res = await fetch(`${BASE}/portfolio/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+interface Props { params: Promise<{ username: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
-  try {
-    const data = await portfolio.getByUsername(username);
-    const name = (data as unknown as { user?: { name?: string } }).user?.name ?? username;
-    return {
-      title: `${name} — Portfolio`,
-      description: data.generated_content?.summary?.slice(0, 160) ?? `${name}'s AI-powered portfolio`,
-    };
-  } catch {
-    return { title: `${username} — Dunno` };
-  }
+  const data = await fetchPublic(username);
+  const name = data?.user?.name ?? username;
+  return {
+    title: `${name} — Portfolio`,
+    description: data?.generated_content?.summary?.slice(0, 160) ?? `${name}'s portfolio`,
+    openGraph: { title: `${name} — Portfolio`, type: "profile" },
+  };
 }
 
 export default async function PublicPortfolioPage({ params }: Props) {
   const { username } = await params;
 
-  let data: Portfolio & { user?: { username: string; name?: string } };
-  try {
-    data = await portfolio.getByUsername(username);
-  } catch {
-    notFound();
+  const cookieStore = await cookies();
+  const tokenCookie = cookieStore.get("dunno_token");
+  const userCookie  = cookieStore.get("dunno_user");
+
+  let storedUser: StoredUser | null = null;
+  if (userCookie?.value) {
+    try { storedUser = JSON.parse(decodeURIComponent(userCookie.value)); } catch { /* ignore */ }
+  }
+  const isOwner = storedUser?.username === username;
+
+  // Always try the public endpoint first — it returns user.name correctly
+  let raw = await fetchPublic(username);
+
+  // Public endpoint failed (portfolio unpublished) — allow owner to still see it
+  if (!raw) {
+    if (!isOwner || !tokenCookie?.value) notFound();
+    const owned = await fetchOwn(tokenCookie.value);
+    if (!owned) notFound();
+    raw = { ...owned, user: { username, email: storedUser?.email } };
   }
 
-  if (!data.published) notFound();
+  // Portfolio is always accessible with the link — no published gating
 
-  const accentColor = COLOR_MAP[data.theme_color] ?? COLOR_MAP.indigo;
-  const content = data.generated_content;
-
+  const content = raw.generated_content;
   if (!content) {
     return (
-      <div className="min-h-screen bg-[#07070f] flex items-center justify-center text-[#64748b]">
+      <div style={{
+        minHeight: "100vh", background: "#fdfaf6",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "'Manrope', sans-serif", color: "#d4b896", fontSize: 14,
+      }}>
         Portfolio generation in progress…
       </div>
     );
   }
 
+  const portfolioData = adaptGeneratedContent(
+    content,
+    raw.user?.name ?? username,
+    raw.user?.github_url,
+    raw.user?.email,
+  );
+
+  // Map backend template name → frontend ID, default to "minimal"
+  const backendTemplate = (raw as unknown as Record<string, unknown>).selected_template as string | undefined;
+  const initialTemplate: TemplateId = (backendTemplate ? TEMPLATE_FROM_BACKEND[backendTemplate] : undefined) ?? "minimal";
+
   return (
-    <SoftwareTemplate
+    <PortfolioClient
+      data={portfolioData}
       username={username}
-      name={data.user?.name ?? username}
-      accentColor={accentColor}
-      content={content}
+      initialTemplate={initialTemplate}
     />
   );
 }

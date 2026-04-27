@@ -1,12 +1,13 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const BASE_URL = "https://dunno-backend-production.up.railway.app";
 
 async function request<T>(
   path: string,
   options: RequestInit = {},
   auth = true
 ): Promise<T> {
+  const isFormData = options.body instanceof FormData;
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(options.headers as Record<string, string>),
   };
 
@@ -30,7 +31,7 @@ async function request<T>(
 export interface AuthResponse {
   access_token: string;
   token_type: string;
-  user: { id: string; email: string; username: string };
+  user: { id: string; email: string; username: string; status: "onboarding" | "processing" | "ready" };
 }
 
 export const auth = {
@@ -59,18 +60,53 @@ export const auth = {
     }, false),
 
   me: () => request<AuthResponse["user"]>("/auth/me"),
+
+  google: (supabaseToken: string) =>
+    request<AuthResponse["user"]>("/auth/google", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${supabaseToken}` },
+    }, false),
+};
+
+// ── Pre-auth uploads (fired immediately after login) ─────────────────────────
+
+export interface ResumeUploadResponse {
+  id: string;
+  file_url: string;
+  chars_extracted: number;
+}
+
+export interface ResumeMetadata {
+  id: string;
+  file_url: string;
+  chars_extracted: number;
+}
+
+export const uploads = {
+  resume: (b64: string, filename: string, _mimeType: string) => {
+    void _mimeType;
+    const bytes = atob(b64);
+    const arr = new Uint8Array(bytes.length);
+    for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+    const safeName = filename.toLowerCase().endsWith(".pdf") ? filename : `${filename}.pdf`;
+    const file = new File([arr], safeName, { type: "application/pdf" });
+    const form = new FormData();
+    form.append("file", file);
+    return request<ResumeUploadResponse>("/resume/upload", { method: "POST", body: form });
+  },
+
+  github: (url: string) =>
+    request<{ message: string }>("/links/github", {
+      method: "POST",
+      body: JSON.stringify({ url }),
+    }),
+};
+
+export const resume = {
+  getMe: () => request<ResumeMetadata>("/resume/me"),
 };
 
 // ── Onboarding ────────────────────────────────────────────────────────────────
-
-export interface ThemePayload {
-  theme_color: string;
-  theme_category: string;
-}
-
-export interface LinksPayload {
-  links: Array<{ type: string; url: string }>;
-}
 
 export interface Project {
   id: string;
@@ -89,7 +125,9 @@ export interface Portfolio {
   theme_category: string;
   target_roles: string[];
   published: boolean;
+  selected_template?: string;
   generated_content?: GeneratedContent;
+  repos?: Repo[];
 }
 
 export interface GeneratedContent {
@@ -106,45 +144,44 @@ export interface GeneratedContent {
   stats?: Array<{ label: string; value: string }>;
 }
 
+export interface GenerateResponse {
+  portfolio_id: string;
+  generated_content: GeneratedContent;
+  repos_used: number;
+  target_roles: string[];
+}
+
 export const onboarding = {
-  saveTheme: (payload: ThemePayload) =>
-    request<{ message: string }>("/onboarding/theme", {
+  generate: (body?: { target_roles?: string[]; extra_context?: string }) =>
+    request<GenerateResponse>("/portfolio/generate", {
       method: "POST",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(body ?? {}),
     }),
+};
 
-  uploadResume: (file: File, targetRoles: string[]) => {
-    const form = new FormData();
-    form.append("file", file);
-    form.append("target_roles", JSON.stringify(targetRoles));
-    return request<{ message: string; resume_id: string }>("/onboarding/resume", {
-      method: "POST",
-      body: form,
-      headers: {},
-    });
-  },
+// ── Links / repos ─────────────────────────────────────────────────────────────
 
-  saveLinks: (payload: LinksPayload) =>
-    request<{ projects: Project[] }>("/onboarding/links", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    }),
+export interface Repo {
+  id: string;
+  included: boolean;
+  name: string;
+  description: string | null;
+  url: string;
+  stars: number;
+  language: string | null;
+  topics: string[];
+}
 
-  updateProjectInclusion: (projectId: string, included: boolean) =>
-    request<{ message: string }>(`/onboarding/projects/${projectId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ included }),
-    }),
-
-  generate: () =>
-    request<{ portfolio: Portfolio }>("/onboarding/generate", { method: "POST" }),
+export const links = {
+  getRepos: () => request<Repo[]>("/links/repos"),
+  toggleRepo: (id: string) => request<{ id: string; included: boolean }>(`/links/${id}/toggle`, { method: "PATCH" }),
 };
 
 // ── Portfolio ─────────────────────────────────────────────────────────────────
 
 export const portfolio = {
   getByUsername: (username: string) =>
-    request<Portfolio & { user: { username: string; name?: string } }>(
+    request<Portfolio & { user: { username: string; name?: string; email?: string; github_url?: string } }>(
       `/portfolio/${username}`,
       {},
       false
@@ -152,7 +189,7 @@ export const portfolio = {
 
   getOwn: () => request<Portfolio>("/portfolio/me"),
 
-  update: (data: Partial<ThemePayload & { target_roles: string[] }>) =>
+  update: (data: Partial<{ theme_color: string; theme_category: string; target_roles: string[] }>) =>
     request<Portfolio>("/portfolio/me", {
       method: "PATCH",
       body: JSON.stringify(data),

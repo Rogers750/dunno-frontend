@@ -6,7 +6,8 @@ import { Globe, RefreshCw, Eye, EyeOff, ExternalLink, Copy, Check, LogOut } from
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
 import { portfolio, type Portfolio } from "@/lib/api";
-import { clearToken, getUser, isAuthenticated } from "@/lib/auth";
+import { clearToken } from "@/lib/auth";
+import { useRequireUser } from "@/lib/useRequireUser";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -16,15 +17,26 @@ export default function DashboardPage() {
   const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
-  const user = typeof window !== "undefined" ? getUser() : null;
+  const { user, checkingUser } = useRequireUser();
 
   useEffect(() => {
-    if (!isAuthenticated()) { router.replace("/login"); return; }
+    if (checkingUser) return;
+    if (!user) return;
+    if (user.status === "onboarding") { router.replace("/onboarding"); return; }
+    if (user.status === "processing") { router.replace("/calibrating"); return; }
+
     portfolio.getOwn()
       .then(setData)
-      .catch(() => setError("Failed to load portfolio"))
+      .catch((err: unknown) => {
+        if (err instanceof Error && err.message.includes("404")) {
+          router.replace("/onboarding");
+        } else {
+          setError("Failed to load portfolio");
+          setLoading(false);
+        }
+      })
       .finally(() => setLoading(false));
-  }, [router]);
+  }, [checkingUser, router, user]);
 
   async function handlePublishToggle() {
     if (!data) return;
@@ -68,7 +80,7 @@ export default function DashboardPage() {
       <main className="max-w-4xl mx-auto px-8 py-14">
         <h1 className="headline-l text-[#1c0f00] mb-12">Dashboard</h1>
 
-        {loading && <p className="body-m text-[#d4b896]">Loading…</p>}
+        {(checkingUser || loading) && <p className="body-m text-[#d4b896]">Loading…</p>}
 
         {error && (
           <div className="bg-[#fde8d8] rounded-md px-5 py-4 mb-8">
@@ -98,7 +110,7 @@ export default function DashboardPage() {
                 <Globe className={`h-5 w-5 ${data.published ? "text-[#D4834A]" : "text-[#f3e8d8]"}`} />
               </div>
 
-              {user && (
+              {user?.username && (
                 <div className="flex items-center gap-3 bg-[#f9f2e8] rounded-md px-5 py-3.5 mb-6">
                   <span className="body-m text-[#6b4a28] flex-1">
                     dunno.app/<span className="font-[600] text-[#1c0f00]">{user.username}</span>
@@ -127,7 +139,7 @@ export default function DashboardPage() {
                     ? <><EyeOff className="h-4 w-4" />Unpublish</>
                     : <><Eye className="h-4 w-4" />Publish</>}
                 </Button>
-                {user && (
+                {user?.username && (
                   <a href={`/${user.username}`}>
                     <Button variant="secondary" size="sm">
                       Preview <ExternalLink className="h-3.5 w-3.5" />

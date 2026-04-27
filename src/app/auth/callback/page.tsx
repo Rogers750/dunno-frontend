@@ -10,29 +10,31 @@ export default function AuthCallback() {
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!session) {
+      if (!session?.access_token) {
         router.replace("/login");
         return;
       }
 
-      setToken(session.access_token);
-
-      // Fetch or create profile from backend
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/auth/me`,
-          { headers: { Authorization: `Bearer ${session.access_token}` } }
-        );
-        if (res.ok) {
-          const user = await res.json();
-          setUser(user);
-          router.replace("/dashboard");
-        } else {
-          // New user — send to onboarding
-          router.replace("/onboarding");
-        }
-      } catch {
-        router.replace("/onboarding");
+        const res = await fetch("https://dunno-backend-production.up.railway.app/auth/google", {
+          method: "POST",
+          headers: { Authorization: `Bearer ${session.access_token}` },
+        });
+
+        if (!res.ok) throw new Error(`Backend returned ${res.status}`);
+
+        const user: { id: string; email: string; username: string; status: "onboarding" | "processing" | "ready" } = await res.json();
+
+        if (!user.username) throw new Error("No username returned");
+
+        setToken(session.access_token);
+        setUser(user);
+        if (user.status === "onboarding") router.replace("/onboarding");
+        else if (user.status === "processing") router.replace("/calibrating");
+        else router.replace("/dashboard");
+      } catch (err) {
+        console.error("Auth callback failed:", err);
+        router.replace("/login");
       }
     });
   }, [router]);

@@ -13,27 +13,61 @@ function HeroUpload({ boxRef, highlight }: { boxRef: React.RefObject<HTMLDivElem
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [step, setStep] = useState<"upload" | "github">("upload");
-  const [github, setGithub] = useState("");
+  const [step, setStep] = useState<"upload" | "github">(() => {
+    if (typeof window === "undefined") return "upload";
+    return sessionStorage.getItem("dunno_restore_step") && sessionStorage.getItem("dunno_resume_name")
+      ? "github"
+      : "upload";
+  });
+  const [github, setGithub] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return sessionStorage.getItem("dunno_github_url") ?? "";
+  });
+  const [fileError, setFileError] = useState("");
 
-  // Restore github step when user navigates back from login
+  // Restore github step only when navigating back from login (not on reload)
   useEffect(() => {
-    if (sessionStorage.getItem("dunno_resume_name")) setStep("github");
-    const saved = sessionStorage.getItem("dunno_github_url");
-    if (saved) setGithub(saved);
+    if (sessionStorage.getItem("dunno_restore_step")) {
+      sessionStorage.removeItem("dunno_restore_step");
+    } else {
+      sessionStorage.removeItem("dunno_resume_b64");
+      sessionStorage.removeItem("dunno_resume_name");
+      sessionStorage.removeItem("dunno_resume_type");
+      sessionStorage.removeItem("dunno_github_url");
+    }
   }, []);
 
-  function handleFile(f: File) { setFile(f); }
+  function handleFile(f: File) {
+    const isPdf = f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf) {
+      setFile(null);
+      setFileError("Only PDF resumes are supported.");
+      return;
+    }
+
+    setFile(f);
+    setFileError("");
+  }
 
   function handleBuildMine() {
     if (!file) return;
     setStep("github");
   }
 
-  function handleGo() {
+  async function handleGo() {
     if (!file) return;
+    const b64 = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve((reader.result as string).split(",")[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+    sessionStorage.setItem("dunno_resume_b64", b64);
     sessionStorage.setItem("dunno_resume_name", file.name);
+    sessionStorage.setItem("dunno_resume_type", file.type || "application/pdf");
     if (github.trim()) sessionStorage.setItem("dunno_github_url", github.trim());
+    else sessionStorage.removeItem("dunno_github_url");
+    sessionStorage.setItem("dunno_restore_step", "1");
     router.push("/login?mode=register");
   }
 
@@ -44,7 +78,7 @@ function HeroUpload({ boxRef, highlight }: { boxRef: React.RefObject<HTMLDivElem
       <input
         id="resume-upload"
         type="file"
-        accept=".pdf,.doc,.docx"
+        accept=".pdf,application/pdf"
         style={{ position: "fixed", top: -9999, left: -9999, opacity: 0 }}
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }}
       />
@@ -89,6 +123,9 @@ function HeroUpload({ boxRef, highlight }: { boxRef: React.RefObject<HTMLDivElem
                 </p>
               )}
             </label>
+            {fileError && (
+              <p className="px-5 pb-1 text-[12px] font-[600] text-[#7a2a00]">{fileError}</p>
+            )}
 
             {/* Action bar */}
             <div className="flex items-center gap-2 px-4 py-3 border-t" style={{ borderColor: "rgba(212,184,150,0.18)" }}>
