@@ -35,6 +35,11 @@ export default function DarkGlassTemplate({ data }: Props) {
         .dg-link { transition: color 0.18s; }
         .dg-link:hover { color: #F5C98A !important; }
         .dg-skill:hover { background: rgba(212,131,74,0.14) !important; border-color: rgba(212,131,74,0.40) !important; color: #F5C98A !important; }
+        .dg-nav-links { display: flex; gap: 28px; align-items: center; }
+        @media (max-width: 640px) {
+          .dg-nav-links { display: none; }
+          .dg-main-pad { padding-left: 20px !important; padding-right: 20px !important; }
+        }
       `}</style>
 
       {/* ── Nav ─────────────────────────────────────────────────────── */}
@@ -47,8 +52,8 @@ export default function DarkGlassTemplate({ data }: Props) {
           <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 15, letterSpacing: "-0.02em", background: "linear-gradient(135deg, #F5C98A 0%, #D4834A 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             {personal.name.split(" ")[0]}.
           </span>
-          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
-            {["Experience", "Projects", "Skills", "Contact"].map(item => (
+          <div className="dg-nav-links">
+            {["Experience", "Projects", "Skills"].map(item => (
               <a key={item} href={`#dg-${item.toLowerCase()}`}
                 style={{ fontSize: 13, fontWeight: 500, color: "rgba(232,224,216,0.55)", textDecoration: "none" }}
                 className="dg-link">
@@ -62,7 +67,7 @@ export default function DarkGlassTemplate({ data }: Props) {
                   background: "linear-gradient(135deg, #D4834A 0%, #8B4E1A 100%)",
                   color: "#fff", padding: "7px 18px", borderRadius: 999, textDecoration: "none",
                 }}>
-                Contact
+                Hire me
               </a>
             )}
           </div>

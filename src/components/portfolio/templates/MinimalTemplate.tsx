@@ -8,7 +8,7 @@ interface Props { data: PortfolioData }
 
 export default function MinimalTemplate({ data }: Props) {
   const { personal, social, skills, experience, projects, education, stats } = data;
-  const navItems = ["Experience", "Skills", "Projects", "Contact"];
+  const navItems = ["Experience", "Skills", "Projects"];
 
   return (
     <div style={{ minHeight: "100vh", background: "#fdfaf6", fontFamily: "'Manrope', sans-serif", color: "#1c0f00" }}>
@@ -23,6 +23,15 @@ export default function MinimalTemplate({ data }: Props) {
         .minimal-link:hover { color: #D4834A !important; }
         .minimal-btn-primary:hover { opacity: 0.88; }
         .minimal-btn-outline:hover { border-color: rgba(212,131,74,0.60) !important; }
+        .minimal-nav-links { display: flex; gap: 28px; align-items: center; }
+        @media (max-width: 640px) {
+          .minimal-nav-links { display: none; }
+          .minimal-main { padding: 0 20px !important; }
+          .minimal-hero { padding: 48px 0 40px !important; }
+          .minimal-exp-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+          .minimal-skills-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+          .minimal-edu-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+        }
       `}</style>
 
       {/* ── Sticky nav ──────────────────────────────────────────────── */}
@@ -36,7 +45,7 @@ export default function MinimalTemplate({ data }: Props) {
             {personal.name.split(" ")[0]}
             <span style={{ color: "#D4834A" }}>.</span>
           </span>
-          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          <div className="minimal-nav-links">
             {navItems.map(item => (
               <a key={item} href={`#minimal-${item.toLowerCase()}`}
                 style={{ fontSize: 13, fontWeight: 500, color: "#6b4a28", textDecoration: "none", transition: "color 0.18s" }}
@@ -60,10 +69,10 @@ export default function MinimalTemplate({ data }: Props) {
         </div>
       </nav>
 
-      <main style={{ maxWidth: 1080, margin: "0 auto", padding: "0 32px" }}>
+      <main className="minimal-main" style={{ maxWidth: 1080, margin: "0 auto", padding: "0 32px" }}>
 
         {/* ── Hero ───────────────────────────────────────────────────── */}
-        <section style={{ padding: "88px 0 80px" }}>
+        <section className="minimal-hero" style={{ padding: "88px 0 80px" }}>
 
           {/* Role label */}
           {personal.title && (
@@ -183,7 +192,7 @@ export default function MinimalTemplate({ data }: Props) {
             </p>
             <div>
               {experience.map((exp, i) => (
-                <div key={i} style={{
+                <div key={i} className="minimal-exp-grid" style={{
                   display: "grid", gridTemplateColumns: "160px 1fr", gap: "0 40px",
                   paddingBottom: 44,
                   borderBottom: i < experience.length - 1 ? "1px solid rgba(212,184,150,0.14)" : "none",
@@ -228,7 +237,7 @@ export default function MinimalTemplate({ data }: Props) {
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
               {skills.map((group) => (
-                <div key={group.category} style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "0 40px", alignItems: "flex-start" }}>
+                <div key={group.category} className="minimal-skills-grid" style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "0 40px", alignItems: "flex-start" }}>
                   <div style={{ fontSize: 12, fontWeight: 700, color: "#d4b896", paddingTop: 5, letterSpacing: "0.05em" }}>
                     {group.category}
                   </div>
@@ -306,7 +315,7 @@ export default function MinimalTemplate({ data }: Props) {
             </p>
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {education.map((edu, i) => (
-                <div key={i} style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "0 40px" }}>
+                <div key={i} className="minimal-edu-grid" style={{ display: "grid", gridTemplateColumns: "160px 1fr", gap: "0 40px" }}>
                   <div style={{ fontSize: 12, fontWeight: 600, color: "#d4b896", paddingTop: 2 }}>{edu.duration}</div>
                   <div>
                     <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 600, fontSize: 15, color: "#1c0f00" }}>{edu.degree}</div>

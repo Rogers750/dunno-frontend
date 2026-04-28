@@ -27,6 +27,13 @@ export default function CreativeTemplate({ data }: Props) {
         .cr-proj-link:hover { color: #D4834A !important; }
         .cr-nav-link:hover { color: #D4834A !important; }
         .cr-exp-card:hover { border-color: rgba(212,131,74,0.50) !important; }
+        .cr-nav-links { display: flex; gap: 28px; align-items: center; }
+        @media (max-width: 640px) {
+          .cr-nav-links { display: none; }
+          .cr-hero { grid-template-columns: 1fr !important; padding: 40px 20px !important; }
+          .cr-hero-right { display: none; }
+          .cr-section-pad { padding-left: 20px !important; padding-right: 20px !important; }
+        }
       `}</style>
 
       {/* ── Nav ─────────────────────────────────────────────────────── */}
@@ -39,7 +46,7 @@ export default function CreativeTemplate({ data }: Props) {
           <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, fontSize: 15, letterSpacing: "-0.02em", color: "#1c0f00" }}>
             {personal.name.split(" ")[0]}<span style={{ color: "#D4834A" }}>.</span>
           </span>
-          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          <div className="cr-nav-links">
             {["Experience", "Projects", "Skills"].map(item => (
               <a key={item} href={`#cr-${item.toLowerCase()}`}
                 style={{ fontSize: 13, fontWeight: 500, color: "#6b4a28", textDecoration: "none", transition: "color 0.18s" }}
@@ -60,7 +67,7 @@ export default function CreativeTemplate({ data }: Props) {
       </nav>
 
       {/* ── Hero (split layout) ─────────────────────────────────────── */}
-      <section style={{
+      <section className="cr-hero" style={{
         maxWidth: 1100, margin: "0 auto", padding: "72px 32px 80px",
         display: "grid", gridTemplateColumns: "1fr 1.1fr", gap: 64, alignItems: "center",
       }}>
