@@ -72,7 +72,7 @@ export default function DesignTemplate({ name, accentColor, content }: Props) {
             <h1 className="text-5xl font-[300] leading-[1.1] text-[#1a1a1a] mb-6 tracking-[-0.02em]">
               {name}
             </h1>
-            <p className="text-[#666] leading-relaxed text-lg max-w-xl">{content.summary}</p>
+            <p className="text-[#666] leading-relaxed text-lg max-w-xl">{content.personal.bio}</p>
             <div className="mt-8 flex gap-3">
               <a
                 href="#contact"
@@ -91,65 +91,46 @@ export default function DesignTemplate({ name, accentColor, content }: Props) {
         </section>
 
         {/* Projects — large grid, FIRST */}
-        {content.projects.filter((p) => p.included).length > 0 && (
+        {content.projects.length > 0 && (
           <section id="work" className="pb-20">
             <div className="flex items-baseline justify-between mb-10">
               <h2 className="text-3xl font-[600] text-[#1a1a1a]">Selected work</h2>
-              <span className="text-sm text-[#bbb]">
-                {content.projects.filter((p) => p.included).length} projects
-              </span>
+              <span className="text-sm text-[#bbb]">{content.projects.length} projects</span>
             </div>
 
             <div className="grid md:grid-cols-2 gap-5">
-              {content.projects.filter((p) => p.included).map((p, i) => (
+              {content.projects.map((p, i) => (
                 <a
-                  key={p.id}
-                  href={p.url ?? "#"}
+                  key={i}
+                  href={p.github || p.live || "#"}
                   target="_blank"
                   rel="noreferrer"
                   className="group block rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
                 >
-                  {/* Colour thumbnail */}
                   <div
                     className="h-44 flex items-end p-5"
                     style={{
-                      background:
-                        i % 3 === 0
-                          ? `linear-gradient(135deg, ${accentColor}28, ${accentColor}08)`
-                          : i % 3 === 1
-                          ? "#f0f0f0"
-                          : `linear-gradient(135deg, ${accentColor}14, #f5f5f5)`,
+                      background: i % 3 === 0
+                        ? `linear-gradient(135deg, ${accentColor}28, ${accentColor}08)`
+                        : i % 3 === 1 ? "#f0f0f0"
+                        : `linear-gradient(135deg, ${accentColor}14, #f5f5f5)`,
                     }}
                   >
                     <div className="flex gap-1.5 flex-wrap">
-                      {p.tags.slice(0, 3).map((t) => (
-                        <span
-                          key={t}
-                          className="text-[10px] font-[700] tracking-[0.08em] uppercase px-2 py-1 rounded-md"
-                          style={{
-                            background: "rgba(255,255,255,0.85)",
-                            color: accentColor,
-                            backdropFilter: "blur(4px)",
-                          }}
-                        >
+                      {p.tech.slice(0, 3).map((t) => (
+                        <span key={t} className="text-[10px] font-[700] tracking-[0.08em] uppercase px-2 py-1 rounded-md"
+                          style={{ background: "rgba(255,255,255,0.85)", color: accentColor, backdropFilter: "blur(4px)" }}>
                           {t}
                         </span>
                       ))}
                     </div>
                   </div>
-
-                  {/* Card body */}
                   <div className="bg-white p-5 border-t" style={{ borderColor: "#f5f5f5" }}>
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-[600] text-[#1a1a1a]">{p.title}</h3>
-                      <ExternalLink
-                        className="h-4 w-4 transition-colors shrink-0 mt-0.5"
-                        style={{ color: "#ddd" }}
-                      />
+                      <h3 className="font-[600] text-[#1a1a1a]">{p.name}</h3>
+                      <ExternalLink className="h-4 w-4 shrink-0 mt-0.5" style={{ color: "#ddd" }} />
                     </div>
-                    <p className="text-sm text-[#888] leading-relaxed line-clamp-2">
-                      {p.description}
-                    </p>
+                    <p className="text-sm text-[#888] leading-relaxed line-clamp-2">{p.description}</p>
                   </div>
                 </a>
               ))}
@@ -197,10 +178,10 @@ export default function DesignTemplate({ name, accentColor, content }: Props) {
                   >
                     {exp.company}
                   </div>
-                  <div className="text-xs text-[#bbb] mt-1">{exp.period}</div>
+                  <div className="text-xs text-[#bbb] mt-1">{exp.duration}</div>
                 </div>
                 <div>
-                  <p className="font-[600] text-[#1a1a1a] mb-2">{exp.title}</p>
+                  <p className="font-[600] text-[#1a1a1a] mb-2">{exp.role}</p>
                   <p className="text-sm text-[#888] leading-relaxed">{exp.highlights[0]}</p>
                 </div>
               </div>
