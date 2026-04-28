@@ -216,7 +216,7 @@ const steps = [
   { icon: "📄", label: "Upload resume", desc: "PDF or paste text. Your data stays yours." },
   { icon: "🔗", label: "Add links", desc: "GitHub, Behance, Dribbble — AI fetches everything." },
   { icon: "✦",  label: "AI builds it", desc: "Your work, analysed and turned into a story." },
-  { icon: "◎",  label: "Go live", desc: "Share dunno.app/yourname from day one." },
+  { icon: "◎",  label: "Go live", desc: "Share dunnoai.com/app/username from day one." },
 ];
 
 const features = [
@@ -237,7 +237,7 @@ const features = [
   },
   {
     icon: <Globe className="h-5 w-5" />,
-    title: "dunno.app/yourname",
+    title: "dunnoai.com/app/username",
     desc: "A clean URL for your resume, LinkedIn bio, and cold emails.",
   },
   {
@@ -303,7 +303,7 @@ export default function LandingPage() {
 
           <p className="body-l text-[#6b4a28] max-w-xl mx-auto mb-12 leading-relaxed">
             Upload your resume. Add your GitHub. Dunno builds a beautiful portfolio at{" "}
-            <span className="font-[600] text-[#1c0f00]">dunno.app/yourname</span> — in minutes.
+            <span className="font-[600] text-[#1c0f00]">dunnoai.com/app/username</span> — in minutes.
           </p>
 
           {/* ── Chat-style upload box ──────────────────── */}
