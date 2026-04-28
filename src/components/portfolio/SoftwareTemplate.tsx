@@ -293,8 +293,7 @@ export default function SoftwareTemplate({ username, name, accentColor, content 
               {content.education.map((edu, i) => (
                 <div key={i} className="bg-[#0f0f1a] border border-[#1e1e30] rounded-xl p-4">
                   <div className="font-['Space_Grotesk'] font-semibold text-white">{edu.degree}</div>
-                  <div className="text-sm text-[#64748b] mt-0.5">{edu.institution} · {edu.year}</div>
-                  {edu.gpa && <div className="text-xs mt-1" style={{ color: accentColor }}>GPA {edu.gpa}</div>}
+                  <div className="text-sm text-[#64748b] mt-0.5">{edu.institution} · {edu.duration}</div>
                 </div>
               ))}
             </div>

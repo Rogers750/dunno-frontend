@@ -230,10 +230,8 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
                   <p className="text-sm text-[#aaa] mt-1">{edu.institution}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-[#aaa]">{edu.year}</p>
-                  {edu.gpa && (
+                  <p className="text-sm text-[#aaa]">{edu.duration}</p>
                     <p className="text-sm font-[700] mt-1" style={{ color: accentColor }}>
-                      GPA {edu.gpa}
                     </p>
                   )}
                 </div>
