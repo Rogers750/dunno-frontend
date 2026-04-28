@@ -4,6 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Dunno — AI-powered portfolios",
   description: "Upload your resume, Dunno builds your portfolio. Share dunnoai.com/yourname.",
+  icons: { icon: "/favicon.ico" },
   openGraph: {
     title: "Dunno — AI-powered portfolios",
     description: "Upload your resume, Dunno builds your portfolio.",
