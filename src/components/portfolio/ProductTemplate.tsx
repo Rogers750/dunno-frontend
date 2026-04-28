@@ -231,9 +231,6 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-[#aaa]">{edu.duration}</p>
-                    <p className="text-sm font-[700] mt-1" style={{ color: accentColor }}>
-                    </p>
-                  )}
                 </div>
               </div>
             ))}

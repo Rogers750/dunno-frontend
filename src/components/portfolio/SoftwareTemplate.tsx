@@ -227,11 +227,7 @@ export default function SoftwareTemplate({ username, name, accentColor, content 
                           rel="noreferrer"
                           className="text-[#475569] group-hover:text-[#818cf8] transition-colors"
                         >
-                          {p.source === "github" ? (
-                            <GitBranch className="h-4 w-4" />
-                          ) : (
-                            <ExternalLink className="h-4 w-4" />
-                          )}
+                          {p.live ? <ExternalLink className="h-4 w-4" /> : <GitBranch className="h-4 w-4" />}
                         </a>
                       )}
                     </div>
