@@ -193,7 +193,7 @@ export const portfolio = {
     request<{ portfolio: Portfolio }>("/portfolio/me/regenerate", { method: "POST" }),
 
   setPublished: (published: boolean) =>
-    request<Portfolio>("/portfolio/me/publish", {
+    request<Portfolio>("/portfolio/publish", {
       method: "POST",
       body: JSON.stringify({ published }),
     }),

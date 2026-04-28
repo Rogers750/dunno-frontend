@@ -2,202 +2,146 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Globe, RefreshCw, Eye, EyeOff, ExternalLink, Copy, Check, LogOut } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Globe, RefreshCw, Briefcase, FileText, LogOut, Copy, Check, ExternalLink } from "lucide-react";
 import { Logo } from "@/components/ui/Logo";
-import { portfolio, type Portfolio } from "@/lib/api";
+import { Button } from "@/components/ui/Button";
+import { portfolio } from "@/lib/api";
 import { clearToken } from "@/lib/auth";
 import { useRequireUser } from "@/lib/useRequireUser";
 
+type Tab = "portfolio" | "regenerate" | "jobs" | "resume";
+
+const NAV: { id: Tab; label: string; icon: React.ReactNode }[] = [
+  { id: "portfolio",   label: "Portfolio site",         icon: <Globe size={16} /> },
+  { id: "regenerate",  label: "Regenerate portfolio",   icon: <RefreshCw size={16} /> },
+  { id: "jobs",        label: "Jobs for me",            icon: <Briefcase size={16} /> },
+  { id: "resume",      label: "Rebuild resume & cover", icon: <FileText size={16} /> },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
-  const [data, setData] = useState<Portfolio | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, checkingUser } = useRequireUser();
+  const [tab, setTab] = useState<Tab>("portfolio");
+  const [published, setPublished] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
-  const [publishing, setPublishing] = useState(false);
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState("");
-  const { user, checkingUser } = useRequireUser();
 
   useEffect(() => {
-    if (checkingUser) return;
-    if (!user) return;
+    if (checkingUser || !user) return;
     if (user.status === "onboarding") { router.replace("/onboarding"); return; }
     if (user.status === "processing") { router.replace("/calibrating"); return; }
-
     portfolio.getOwn()
-      .then(setData)
+      .then((p) => setPublished(p.published))
       .catch((err: unknown) => {
-        if (err instanceof Error && err.message.includes("404")) {
-          router.replace("/onboarding");
-        } else {
-          setError("Failed to load portfolio");
-          setLoading(false);
-        }
-      })
-      .finally(() => setLoading(false));
+        if (err instanceof Error && err.message.includes("404")) router.replace("/onboarding");
+      });
   }, [checkingUser, router, user]);
-
-  async function handlePublishToggle() {
-    if (!data) return;
-    setPublishing(true);
-    try { const u = await portfolio.setPublished(!data.published); setData(u); }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : "Failed to update"); }
-    finally { setPublishing(false); }
-  }
 
   async function handleRegenerate() {
     setRegenerating(true); setError("");
-    try { const r = await portfolio.regenerate(); setData(r.portfolio); }
-    catch (err: unknown) { setError(err instanceof Error ? err.message : "Regeneration failed"); }
+    try { await portfolio.regenerate(); router.replace("/calibrating"); }
+    catch (err: unknown) { setError(err instanceof Error ? err.message : "Failed"); }
     finally { setRegenerating(false); }
   }
 
   function copyUrl() {
     if (!user) return;
     navigator.clipboard.writeText(`https://dunno.app/${user.username}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
 
   return (
-    <div className="min-h-screen bg-white text-[#1c0f00]">
+    <div style={{ display: "flex", height: "100vh", fontFamily: "'Manrope', sans-serif", background: "#fdfaf6", color: "#1c0f00" }}>
 
-      {/* ── Nav ──────────────────────────────────────────────────── */}
-      <nav className="glass sticky top-0 z-40 border-b border-[rgba(212,184,150,0.20)]">
-        <div className="max-w-4xl mx-auto px-8 py-4 flex items-center justify-between">
+      {/* ── Left sidebar ── */}
+      <div style={{ width: 220, flexShrink: 0, borderRight: "1px solid rgba(212,184,150,0.20)", display: "flex", flexDirection: "column", padding: "20px 12px" }}>
+        <div style={{ marginBottom: 32, paddingLeft: 8 }}>
           <Logo size="sm" />
-          <div className="flex items-center gap-4">
-            {user && <span className="body-s text-[#d4b896] hidden sm:block">{user.email}</span>}
-            <Button variant="ghost" size="sm" onClick={() => { clearToken(); router.push("/"); }}>
-              <LogOut className="h-4 w-4" />
-              Sign out
+        </div>
+
+        <nav style={{ display: "flex", flexDirection: "column", gap: 2, flex: 1 }}>
+          {NAV.map((item) => (
+            <button
+              key={item.id}
+              onClick={() => setTab(item.id)}
+              style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "9px 12px", borderRadius: 8, border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: tab === item.id ? 600 : 400, textAlign: "left",
+                background: tab === item.id ? "rgba(212,131,74,0.10)" : "transparent",
+                color: tab === item.id ? "#D4834A" : "#6b4a28",
+                transition: "all 0.15s",
+              }}
+            >
+              <span style={{ opacity: tab === item.id ? 1 : 0.6 }}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <button
+          onClick={() => { clearToken(); router.push("/"); }}
+          style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 12px", borderRadius: 8, border: "none", cursor: "pointer", fontSize: 13, background: "transparent", color: "#d4b896" }}
+        >
+          <LogOut size={14} /> Sign out
+        </button>
+      </div>
+
+      {/* ── Right content ── */}
+      <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+
+        {/* Portfolio site */}
+        {tab === "portfolio" && user?.username && (
+          <>
+            <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(212,184,150,0.20)", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, background: "rgba(212,184,150,0.10)", borderRadius: 8, padding: "6px 12px", fontSize: 13, color: "#6b4a28" }}>
+                <span style={{ color: "#d4b896" }}>dunno.app/</span>
+                <span style={{ fontWeight: 600 }}>{user.username}</span>
+                <span style={{ marginLeft: 4, width: 6, height: 6, borderRadius: "50%", background: published ? "#D4834A" : "#d4b896", boxShadow: published ? "0 0 6px rgba(212,131,74,0.6)" : "none", flexShrink: 0 }} />
+              </div>
+              <button onClick={copyUrl} title="Copy URL" style={{ border: "none", background: "transparent", cursor: "pointer", color: copied ? "#D4834A" : "#d4b896" }}>
+                {copied ? <Check size={15} /> : <Copy size={15} />}
+              </button>
+              <a href={`/${user.username}`} target="_blank" rel="noreferrer" style={{ color: "#d4b896", display: "flex" }}>
+                <ExternalLink size={15} />
+              </a>
+            </div>
+            <iframe
+              src={`/${user.username}`}
+              style={{ flex: 1, border: "none", width: "100%" }}
+            />
+          </>
+        )}
+
+        {/* Regenerate */}
+        {tab === "regenerate" && (
+          <div style={{ padding: 40 }}>
+            <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Regenerate portfolio</p>
+            <p style={{ fontSize: 13, color: "#6b4a28", marginBottom: 24 }}>Re-run AI generation with your current resume and GitHub.</p>
+            {error && <p style={{ color: "#7a2a00", fontSize: 13, marginBottom: 16 }}>{error}</p>}
+            <Button onClick={handleRegenerate} loading={regenerating}>
+              <RefreshCw size={14} /> Regenerate
             </Button>
           </div>
-        </div>
-      </nav>
+        )}
 
-      <main className="max-w-4xl mx-auto px-8 py-14">
-        <h1 className="headline-l text-[#1c0f00] mb-12">Dashboard</h1>
-
-        {(checkingUser || loading) && <p className="body-m text-[#d4b896]">Loading…</p>}
-
-        {error && (
-          <div className="bg-[#fde8d8] rounded-md px-5 py-4 mb-8">
-            <p className="label-s text-[#7a2a00]">{error}</p>
+        {/* Jobs */}
+        {tab === "jobs" && (
+          <div style={{ padding: 40 }}>
+            <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Jobs for me</p>
+            <p style={{ fontSize: 13, color: "#d4b896" }}>Coming soon — AI-matched job recommendations based on your portfolio.</p>
           </div>
         )}
 
-        {!loading && data && (
-          <div className="flex flex-col gap-6">
-
-            {/* ── Portfolio URL ─────────────────────────── */}
-            <div className="bg-white rounded-lg p-8 shadow-[0_8px_40px_rgba(139,78,26,0.06)]">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <p className="label-m text-[#6b4a28] mb-2">Your portfolio URL</p>
-                  <div className="flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${
-                      data.published
-                        ? "bg-[#D4834A] shadow-[0_0_8px_rgba(245,168,74,0.60)]"
-                        : "bg-[#f3e8d8]"
-                    }`} />
-                    <span className="label-s text-[#d4b896]">
-                      {data.published ? "Published" : "Draft"}
-                    </span>
-                  </div>
-                </div>
-                <Globe className={`h-5 w-5 ${data.published ? "text-[#D4834A]" : "text-[#f3e8d8]"}`} />
-              </div>
-
-              {user?.username && (
-                <div className="flex items-center gap-3 bg-[#f9f2e8] rounded-md px-5 py-3.5 mb-6">
-                  <span className="body-m text-[#6b4a28] flex-1">
-                    dunno.app/<span className="font-[600] text-[#1c0f00]">{user.username}</span>
-                  </span>
-                  <button onClick={copyUrl}
-                    className="text-[#d4b896] hover:text-[#D4834A] transition-colors" title="Copy URL">
-                    {copied ? <Check className="h-4 w-4 text-[#D4834A]" /> : <Copy className="h-4 w-4" />}
-                  </button>
-                  {data.published && (
-                    <a href={`/${user.username}`} target="_blank" rel="noreferrer"
-                      className="text-[#d4b896] hover:text-[#D4834A] transition-colors">
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
-              )}
-
-              <div className="flex gap-3">
-                <Button
-                  variant={data.published ? "danger" : "primary"}
-                  onClick={handlePublishToggle}
-                  loading={publishing}
-                  size="sm"
-                >
-                  {data.published
-                    ? <><EyeOff className="h-4 w-4" />Unpublish</>
-                    : <><Eye className="h-4 w-4" />Publish</>}
-                </Button>
-                {user?.username && (
-                  <a href={`/${user.username}`}>
-                    <Button variant="secondary" size="sm">
-                      Preview <ExternalLink className="h-3.5 w-3.5" />
-                    </Button>
-                  </a>
-                )}
-              </div>
-            </div>
-
-            {/* ── Portfolio details ─────────────────────── */}
-            <div className="bg-[#f9f2e8] rounded-lg p-8">
-              <p className="label-m text-[#6b4a28] mb-6">Portfolio details</p>
-              <div className="grid grid-cols-2 gap-8">
-                <div>
-                  <p className="label-s text-[#d4b896] mb-2">Theme color</p>
-                  <p className="title-s text-[#1c0f00] capitalize">{data.theme_color}</p>
-                </div>
-                <div>
-                  <p className="label-s text-[#d4b896] mb-2">Style</p>
-                  <p className="title-s text-[#1c0f00] capitalize">
-                    {data.theme_category === "ai_chosen" ? "AI chosen" : data.theme_category}
-                  </p>
-                </div>
-                {data.target_roles.length > 0 && (
-                  <div className="col-span-2">
-                    <p className="label-s text-[#d4b896] mb-3">Target roles</p>
-                    <div className="flex flex-wrap gap-2">
-                      {data.target_roles.map((role) => (
-                        <span key={role}
-                          className="body-s bg-[#fde8cc] text-[#8B4E1A] font-[600] rounded-full px-4 py-1.5">
-                          {role}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* ── Regenerate ───────────────────────────── */}
-            <div className="bg-white rounded-lg p-8 shadow-[0_8px_40px_rgba(139,78,26,0.06)]">
-              <p className="label-m text-[#6b4a28] mb-2">Regenerate</p>
-              <p className="body-m text-[#d4b896] mb-6">Re-run the AI generation with your current resume and links.</p>
-              <Button variant="secondary" onClick={handleRegenerate} loading={regenerating} size="sm">
-                <RefreshCw className="h-4 w-4" />
-                Regenerate portfolio
-              </Button>
-            </div>
+        {/* Resume & cover */}
+        {tab === "resume" && (
+          <div style={{ padding: 40 }}>
+            <p style={{ fontSize: 20, fontWeight: 600, marginBottom: 8 }}>Rebuild resume & write cover</p>
+            <p style={{ fontSize: 13, color: "#d4b896" }}>Coming soon — AI-tailored resume and cover letter for any job posting.</p>
           </div>
         )}
-
-        {!loading && !data && !error && (
-          <div className="text-center py-24">
-            <p className="body-l text-[#d4b896] mb-8">No portfolio yet.</p>
-            <Button onClick={() => router.push("/onboarding")}>Start onboarding</Button>
-          </div>
-        )}
-      </main>
+      </div>
     </div>
   );
 }

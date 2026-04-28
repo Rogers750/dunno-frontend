@@ -1,37 +1,140 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Dunno Frontend
 
-## Getting Started
+Frontend for Dunno, an AI portfolio builder that turns a user's resume and selected GitHub repositories into a public portfolio.
 
-First, run the development server:
+## Goal
+
+The product flow is:
+
+1. User uploads a PDF resume from the landing page.
+2. User optionally adds a GitHub profile link.
+3. User signs in with email OTP.
+4. Frontend uploads the stored resume and GitHub link after auth succeeds.
+5. User reviews detected repositories on `/onboarding` and toggles which ones to include.
+6. Frontend triggers portfolio generation.
+7. User lands in a processing state, then a dashboard, then a public portfolio route at `/:username`.
+
+## Stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Lucide icons
+
+## Main Routes
+
+- `/`
+  Landing page with resume upload and optional GitHub input.
+- `/login`
+  Email OTP login flow. No automatic redirect runs here on page load.
+- `/onboarding`
+  Loads repos from `GET /links/repos` and toggles inclusion with `PATCH /links/{link_id}/toggle`.
+- `/calibrating`
+  Waiting state while portfolio generation is processing.
+- `/dashboard`
+  User dashboard for publish/unpublish and regeneration actions.
+- `/:username`
+  Public portfolio page.
+- `/example`
+  Static example/demo page.
+
+## Backend Expectations
+
+The frontend currently talks directly to the Dunno backend hosted at:
+
+`https://dunno-backend-production.up.railway.app`
+
+Important API usage in the current app:
+
+- `POST /auth/verification/send`
+- `POST /auth/verification/verify`
+- `GET /auth/me`
+- `POST /resume/upload`
+- `GET /resume/me`
+- `POST /links/github`
+- `GET /links/repos`
+- `PATCH /links/{link_id}/toggle`
+- `POST /portfolio/generate`
+- `GET /portfolio/me`
+- `POST /portfolio/me/regenerate`
+- `POST /portfolio/me/publish`
+- `GET /portfolio/{username}`
+
+## Resume Upload Contract
+
+The frontend assumes:
+
+- only PDF resumes are supported
+- upload happens with `multipart/form-data`
+- the file field name is `file`
+- auth uses `Authorization: Bearer <token>`
+
+The landing page now restricts uploads to PDFs before auth continues.
+
+## Auth Model
+
+Current auth is email OTP based.
+
+- The frontend stores the session token in local storage and cookies.
+- Protected routes verify the current user before proceeding.
+- If a protected route is opened without a valid user session, the app redirects to `/`.
+- Google/Supabase auth has been removed from this frontend.
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Use `localhost`, not `0.0.0.0`, in the browser when testing CORS-sensitive backend calls.
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+This frontend currently does not require Supabase environment variables.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If you later move backend URLs or add public client configuration, document them here and avoid hardcoding them in multiple places.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+```bash
+npm run dev
+npm run build
+npm run start
+npm run lint
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Build and Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# dunno-frontend
+Production builds use webpack explicitly:
+
+```bash
+npm run build
+```
+
+This is intentional because the project hit Turbopack production build issues during deployment.
+
+For Vercel:
+
+1. Link the project with `vercel`
+2. Ensure the backend allows the deployed frontend origin in CORS
+3. Deploy with `vercel --prod`
+
+## Notes
+
+- `README.md` now reflects the current OTP auth and resume-first onboarding flow.
+- If the backend auth model changes, update this file together with the frontend flow.

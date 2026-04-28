@@ -29,6 +29,27 @@ async function fetchOwn(token: string): Promise<Portfolio | null> {
   } catch { return null; }
 }
 
+async function fetchRepos(token: string): Promise<Repo[] | null> {
+  try {
+    const res = await fetch(`${BASE}/links/repos`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch { return null; }
+}
+
+async function autoPublish(token: string): Promise<void> {
+  try {
+    await fetch(`${BASE}/portfolio/publish`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ published: true }),
+    });
+  } catch { /* silent */ }
+}
+
 interface Props { params: Promise<{ username: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -59,14 +80,15 @@ export default async function PublicPortfolioPage({ params }: Props) {
   let raw = await fetchPublic(username);
 
   // Public endpoint failed (portfolio unpublished) — allow owner to still see it
+  // and auto-publish so future visitors can access it
   if (!raw) {
     if (!isOwner || !tokenCookie?.value) notFound();
     const owned = await fetchOwn(tokenCookie.value);
     if (!owned) notFound();
     raw = { ...owned, user: { username, email: storedUser?.email } };
+    // Publish so the link becomes accessible to everyone
+    await autoPublish(tokenCookie.value);
   }
-
-  // Portfolio is always accessible with the link — no published gating
 
   const content = raw.generated_content;
   if (!content) {
@@ -81,11 +103,22 @@ export default async function PublicPortfolioPage({ params }: Props) {
     );
   }
 
+  // Fetch repos for the owner so projects section shows GitHub repos
+  let repos: Repo[] | undefined;
+  if (isOwner && tokenCookie?.value) {
+    repos = (await fetchRepos(tokenCookie.value)) ?? undefined;
+  }
+  // Fall back to repos embedded in portfolio response (public visitors)
+  if (!repos && raw.repos && raw.repos.length > 0) {
+    repos = raw.repos;
+  }
+
   const portfolioData = adaptGeneratedContent(
     content,
     raw.user?.name ?? username,
     raw.user?.github_url,
     raw.user?.email,
+    repos,
   );
 
   // Map backend template name → frontend ID, default to "minimal"

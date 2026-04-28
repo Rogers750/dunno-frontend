@@ -42,13 +42,20 @@ export default function PortfolioClient({ data: initialData, username, initialTe
     try {
       const token = localStorage.getItem("dunno_token");
       if (!token) return;
-      await fetch(`${BASE}/portfolio/template`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ selected_template: TEMPLATE_TO_BACKEND[selectedTemplate] }),
-      });
+      await Promise.all([
+        fetch(`${BASE}/portfolio/template`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ selected_template: TEMPLATE_TO_BACKEND[selectedTemplate] }),
+        }),
+        fetch(`${BASE}/portfolio/publish`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ published: true }),
+        }),
+      ]);
       setSavedTemplate(selectedTemplate);
-    } catch { /* silent — selection still previewed */ }
+    } catch { /* silent */ }
     finally { setTemplateSaving(false); }
   }
 

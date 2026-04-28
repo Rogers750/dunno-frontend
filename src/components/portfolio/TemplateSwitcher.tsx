@@ -90,7 +90,7 @@ export default function TemplateSwitcher({
                 color: "#fff", transition: "all 0.18s", whiteSpace: "nowrap",
               }}>
               {templateSaving ? <Loader size={10} style={{ animation: "spin 0.8s linear infinite" }} /> : <Save size={10} />}
-              {templateSaving ? "Saving…" : "Save design"}
+              {templateSaving ? "Publishing…" : "Publish"}
             </button>
           </>
         )}
