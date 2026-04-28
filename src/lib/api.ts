@@ -120,21 +120,47 @@ export interface Portfolio {
   target_roles: string[];
   published: boolean;
   selected_template?: string;
+  photo_url?: string;
   generated_content?: GeneratedContent;
-  repos?: Repo[];
 }
 
 export interface GeneratedContent {
-  summary: string;
-  experience: Array<{
+  personal: {
+    name: string;
     title: string;
+    bio: string;
+    location: string;
+    email: string;
+    phone: string;
+    website: string;
+  };
+  social: {
+    github: string;
+    linkedin: string;
+    twitter: string;
+    other: string[];
+  };
+  skills: Array<{ category: string; items: string[] }>;
+  experience: Array<{
     company: string;
-    period: string;
+    role: string;
+    duration: string;
+    description: string;
     highlights: string[];
   }>;
-  skills: Array<{ category: string; items: string[] }>;
-  projects: Project[];
-  education: Array<{ degree: string; institution: string; year: string; gpa?: string }>;
+  projects: Array<{
+    name: string;
+    description: string;
+    tech: string[];
+    github: string;
+    live: string;
+    highlights: string[];
+  }>;
+  education: Array<{
+    institution: string;
+    degree: string;
+    duration: string;
+  }>;
   stats?: Array<{ label: string; value: string }>;
 }
 

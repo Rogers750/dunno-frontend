@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
 import type { Metadata } from "next";
-import type { Portfolio, Repo } from "@/lib/api";
+import type { Portfolio } from "@/lib/api";
 import { adaptGeneratedContent, TEMPLATE_FROM_BACKEND, type TemplateId } from "@/lib/portfolioTypes";
 import PortfolioClient from "@/components/portfolio/PortfolioClient";
 
@@ -29,17 +29,6 @@ async function fetchOwn(token: string): Promise<Portfolio | null> {
   } catch { return null; }
 }
 
-async function fetchRepos(token: string): Promise<Repo[] | null> {
-  try {
-    const res = await fetch(`${BASE}/links/repos`, {
-      headers: { Authorization: `Bearer ${token}` },
-      cache: "no-store",
-    });
-    if (!res.ok) return null;
-    return res.json();
-  } catch { return null; }
-}
-
 async function autoPublish(token: string): Promise<void> {
   try {
     await fetch(`${BASE}/portfolio/publish`, {
@@ -55,10 +44,10 @@ interface Props { params: Promise<{ username: string }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;
   const data = await fetchPublic(username);
-  const name = data?.user?.name ?? username;
+  const name = data?.generated_content?.personal?.name ?? username;
   return {
     title: `${name} — Portfolio`,
-    description: data?.generated_content?.summary?.slice(0, 160) ?? `${name}'s portfolio`,
+    description: data?.generated_content?.personal?.bio?.slice(0, 160) ?? `${name}'s portfolio`,
     openGraph: { title: `${name} — Portfolio`, type: "profile" },
   };
 }
@@ -103,23 +92,7 @@ export default async function PublicPortfolioPage({ params }: Props) {
     );
   }
 
-  // Fetch repos for the owner so projects section shows GitHub repos
-  let repos: Repo[] | undefined;
-  if (isOwner && tokenCookie?.value) {
-    repos = (await fetchRepos(tokenCookie.value)) ?? undefined;
-  }
-  // Fall back to repos embedded in portfolio response (public visitors)
-  if (!repos && raw.repos && raw.repos.length > 0) {
-    repos = raw.repos;
-  }
-
-  const portfolioData = adaptGeneratedContent(
-    content,
-    raw.user?.name ?? username,
-    raw.user?.github_url,
-    raw.user?.email,
-    repos,
-  );
+  const portfolioData = adaptGeneratedContent(content);
 
   // Map backend template name → frontend ID, default to "minimal"
   const backendTemplate = (raw as unknown as Record<string, unknown>).selected_template as string | undefined;

@@ -1,4 +1,4 @@
-import type { GeneratedContent, Repo } from "@/lib/api";
+import type { GeneratedContent } from "@/lib/api";
 
 export interface PortfolioData {
   personal: {
@@ -78,69 +78,15 @@ export function extractGitHubUsername(url: string): string | null {
   }
 }
 
-export function adaptGeneratedContent(
-  content: GeneratedContent,
-  name: string,
-  githubUrl?: string,
-  email?: string,
-  repos?: Repo[],
-): PortfolioData {
-  // If repos are provided (from GET /links/repos or Portfolio.repos),
-  // use them as the authoritative source — filtering by included: true.
-  // Fall back to content.projects only when no repos are available.
-  const projects = repos && repos.length > 0
-    ? repos
-        .filter((r) => r.included)
-        .map((r) => ({
-          name: r.name,
-          description: r.description ?? "",
-          tech: r.topics ?? [],
-          github: r.url,
-          live: "",
-          highlights: [],
-        }))
-    : (content.projects ?? [])
-        .filter((p) => p.included)
-        .map((p) => ({
-          name: p.title,
-          description: p.description ?? "",
-          tech: p.tags ?? [],
-          github: p.source === "github" ? p.url : "",
-          live: p.source !== "github" ? p.url : "",
-          highlights: [],
-        }));
-
+export function adaptGeneratedContent(content: GeneratedContent): PortfolioData {
   return {
-    personal: {
-      name,
-      title: content.experience?.[0]?.title ?? "",
-      bio: content.summary ?? "",
-      location: "",
-      email: email ?? "",
-      phone: "",
-      website: "",
-    },
-    social: {
-      github: githubUrl ?? "",
-      linkedin: "",
-      twitter: "",
-      other: [],
-    },
+    personal: content.personal,
+    social: content.social,
     stats: content.stats,
     skills: content.skills ?? [],
-    experience: (content.experience ?? []).map((e) => ({
-      company: e.company,
-      role: e.title,
-      duration: e.period,
-      description: "",
-      highlights: e.highlights ?? [],
-    })),
-    projects,
-    education: (content.education ?? []).map((e) => ({
-      institution: e.institution,
-      degree: e.degree,
-      duration: e.year,
-    })),
+    experience: content.experience ?? [],
+    projects: content.projects ?? [],
+    education: content.education ?? [],
   };
 }
 
