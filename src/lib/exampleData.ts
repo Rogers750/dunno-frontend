@@ -14,7 +14,7 @@ export const EXAMPLE_CONTENT: GeneratedContent = {
     location: "Bengaluru, India",
     email: "sagar@example.com",
     phone: "",
-    website: "https://dunno.app/sagarmehta",
+    website: "https://dunnoai.com/sagarmehta",
   },
 
   social: {

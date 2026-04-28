@@ -30,7 +30,7 @@ export default function CalibratingPage() {
   useEffect(() => {
     if (checkingUser) return;
     if (!user) return;
-    if (user.status === "ready") { router.replace(`/${user.username}`); return; }
+    if (user.status === "ready") { router.replace(`/app/${user.username}`); return; }
 
     // Cycle messages while generation runs
     let idx = 0;
@@ -50,7 +50,7 @@ export default function CalibratingPage() {
         // Use the username from stored user to navigate to portfolio
         const username = current?.username ?? user.username;
         void res; // generated_content is fetched fresh by the portfolio page
-        router.replace(`/${username}`);
+        router.replace(`/app/${username}`);
       })
       .catch((err: unknown) => {
         clearInterval(msgTimer);

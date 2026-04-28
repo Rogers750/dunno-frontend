@@ -47,7 +47,7 @@ export default function DashboardPage() {
 
   function copyUrl() {
     if (!user) return;
-    navigator.clipboard.writeText(`https://dunno.app/${user.username}`);
+    navigator.clipboard.writeText(`https://dunnoai.com/app/${user.username}`);
     setCopied(true); setTimeout(() => setCopied(false), 2000);
   }
 
@@ -96,19 +96,19 @@ export default function DashboardPage() {
           <>
             <div style={{ padding: "16px 24px", borderBottom: "1px solid rgba(212,184,150,0.20)", display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 8, background: "rgba(212,184,150,0.10)", borderRadius: 8, padding: "6px 12px", fontSize: 13, color: "#6b4a28" }}>
-                <span style={{ color: "#d4b896" }}>dunno.app/</span>
+                <span style={{ color: "#d4b896" }}>dunnoai.com/app/</span>
                 <span style={{ fontWeight: 600 }}>{user.username}</span>
                 <span style={{ marginLeft: 4, width: 6, height: 6, borderRadius: "50%", background: published ? "#D4834A" : "#d4b896", boxShadow: published ? "0 0 6px rgba(212,131,74,0.6)" : "none", flexShrink: 0 }} />
               </div>
               <button onClick={copyUrl} title="Copy URL" style={{ border: "none", background: "transparent", cursor: "pointer", color: copied ? "#D4834A" : "#d4b896" }}>
                 {copied ? <Check size={15} /> : <Copy size={15} />}
               </button>
-              <a href={`/${user.username}`} target="_blank" rel="noreferrer" style={{ color: "#d4b896", display: "flex" }}>
+              <a href={`/app/${user.username}`} target="_blank" rel="noreferrer" style={{ color: "#d4b896", display: "flex" }}>
                 <ExternalLink size={15} />
               </a>
             </div>
             <iframe
-              src={`/${user.username}`}
+              src={`/app/${user.username}`}
               style={{ flex: 1, border: "none", width: "100%" }}
             />
           </>

@@ -7,7 +7,16 @@
       "Bash(git -C /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend rev-parse --show-toplevel)",
       "Bash(npm uninstall *)",
       "Bash(sed -i '' 's/<Github size={14} \\\\/>/<GithubIcon size={14} \\\\/>/g; s/<Github size={18} \\\\/>/<GithubIcon size={18} \\\\/>/g; s/<Linkedin size={18} \\\\/>/<LinkedinIcon size={18} \\\\/>/g; s/<Twitter size={18} \\\\/>/<TwitterIcon size={18} \\\\/>/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/templates/DarkGlassTemplate.tsx)",
-      "Bash(sed -i '' 's/<Github size={14} \\\\/>/<GithubIcon size={14} \\\\/>/g; s/<Github size={18} \\\\/>/<GithubIcon size={18} \\\\/>/g; s/<Linkedin size={17} \\\\/>/<LinkedinIcon size={17} \\\\/>/g; s/<Linkedin size={18} \\\\/>/<LinkedinIcon size={18} \\\\/>/g; s/<Twitter size={17} \\\\/>/<TwitterIcon size={17} \\\\/>/g; s/<Twitter size={18} \\\\/>/<TwitterIcon size={18} \\\\/>/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/templates/CreativeTemplate.tsx)"
+      "Bash(sed -i '' 's/<Github size={14} \\\\/>/<GithubIcon size={14} \\\\/>/g; s/<Github size={18} \\\\/>/<GithubIcon size={18} \\\\/>/g; s/<Linkedin size={17} \\\\/>/<LinkedinIcon size={17} \\\\/>/g; s/<Linkedin size={18} \\\\/>/<LinkedinIcon size={18} \\\\/>/g; s/<Twitter size={17} \\\\/>/<TwitterIcon size={17} \\\\/>/g; s/<Twitter size={18} \\\\/>/<TwitterIcon size={18} \\\\/>/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/templates/CreativeTemplate.tsx)",
+      "Bash(sed -i '' 's/content\\\\.summary/content.personal.bio/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/ProductTemplate.tsx /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/SoftwareTemplate.tsx)",
+      "Bash(sed -i '' 's/exp\\\\.period/exp.duration/g; s/exp\\\\.title/exp.role/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/ProductTemplate.tsx /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/SoftwareTemplate.tsx)",
+      "Bash(sed -i '' 's/\\\\.filter\\(\\(p\\) => p\\\\.included\\)//g; s/p\\\\.tags/p.tech/g; s/p\\\\.title/p.name/g; s/p\\\\.url/p.github/g; s/key={p\\\\.id}/key={p.name}/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/ProductTemplate.tsx /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/SoftwareTemplate.tsx)",
+      "Bash(sed -i '' 's/edu\\\\.year/edu.duration/g' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/ProductTemplate.tsx /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/SoftwareTemplate.tsx)",
+      "Bash(sed -i '' '/edu\\\\.gpa/d' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/ProductTemplate.tsx /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/components/portfolio/SoftwareTemplate.tsx)",
+      "Bash(grep -rn '`/${user' /Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src --include=\"*.tsx\" --include=\"*.ts\")"
+    ],
+    "additionalDirectories": [
+      "/Users/sagarsinghrawal/projects/dunnoai/dunnoai-frontend/src/app/[username]"
     ]
   }
 }

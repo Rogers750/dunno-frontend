@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Dunno — AI-powered portfolios",
-  description: "Upload your resume, Dunno builds your portfolio. Share dunno.app/yourname.",
+  description: "Upload your resume, Dunno builds your portfolio. Share dunnoai.com/yourname.",
   openGraph: {
     title: "Dunno — AI-powered portfolios",
     description: "Upload your resume, Dunno builds your portfolio.",

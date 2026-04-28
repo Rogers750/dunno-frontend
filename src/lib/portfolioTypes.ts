@@ -98,7 +98,7 @@ export const EXAMPLE_PORTFOLIO: PortfolioData = {
     location: "Bengaluru, India",
     email: "sagar@example.com",
     phone: "",
-    website: "https://dunno.app/sagarmehta",
+    website: "https://dunnoai.com/sagarmehta",
   },
   social: {
     github: "https://github.com/sagarmehta",
