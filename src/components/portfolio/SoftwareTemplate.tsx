@@ -161,7 +161,7 @@ export default function SoftwareTemplate({ username, name, accentColor, content 
             {name}
           </h1>
           <p className="text-lg md:text-xl text-[#94a3b8] max-w-2xl leading-relaxed mb-8">
-            {content.summary}
+            {content.personal.bio}
           </p>
           <div className="flex gap-3">
             <a href="#contact">
@@ -188,10 +188,10 @@ export default function SoftwareTemplate({ username, name, accentColor, content 
                     style={{ background: accentColor }}
                   />
                   <div className="mb-1">
-                    <span className="font-['Space_Grotesk'] font-semibold text-white">{exp.title}</span>
+                    <span className="font-['Space_Grotesk'] font-semibold text-white">{exp.role}</span>
                     <span className="text-[#64748b]"> · {exp.company}</span>
                   </div>
-                  <div className="text-xs text-[#475569] mb-3">{exp.period}</div>
+                  <div className="text-xs text-[#475569] mb-3">{exp.duration}</div>
                   <ul className="flex flex-col gap-1.5">
                     {exp.highlights.map((h, j) => (
                       <li key={j} className="text-sm text-[#94a3b8] flex gap-2">
@@ -207,22 +207,22 @@ export default function SoftwareTemplate({ username, name, accentColor, content 
         )}
 
         {/* Projects */}
-        {content.projects.filter((p) => p.included).length > 0 && (
+        {content.projects.length > 0 && (
           <section id="projects" className="pb-20">
             <h2 className="font-['Space_Grotesk'] font-bold text-3xl text-white mb-8">Projects</h2>
             <div className="grid md:grid-cols-2 gap-4">
               {content.projects
-                .filter((p) => p.included)
+                
                 .map((p) => (
                   <div
-                    key={p.id}
+                    key={p.name}
                     className="bg-[#0f0f1a] border border-[#1e1e30] hover:border-[#818cf8]/30 rounded-xl p-5 transition-all group"
                   >
                     <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-['Space_Grotesk'] font-semibold text-white">{p.title}</h3>
-                      {p.url && (
+                      <h3 className="font-['Space_Grotesk'] font-semibold text-white">{p.name}</h3>
+                      {p.github && (
                         <a
-                          href={p.url}
+                          href={p.github}
                           target="_blank"
                           rel="noreferrer"
                           className="text-[#475569] group-hover:text-[#818cf8] transition-colors"
@@ -237,7 +237,7 @@ export default function SoftwareTemplate({ username, name, accentColor, content 
                     </div>
                     <p className="text-sm text-[#64748b] mb-3 leading-relaxed">{p.description}</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {p.tags.map((tag) => (
+                      {p.tech.map((tag) => (
                         <span
                           key={tag}
                           className="text-[11px] rounded px-2 py-0.5"

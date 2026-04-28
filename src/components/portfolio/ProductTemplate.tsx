@@ -55,7 +55,7 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
             {name}
           </h1>
           <p className="text-lg text-[#555] max-w-xl leading-relaxed mb-12">
-            {content.summary}
+            {content.personal.bio}
           </p>
 
           {/* Impact stats row — prominent */}
@@ -104,7 +104,7 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
                     >
                       {exp.company}
                     </div>
-                    <div className="text-sm text-[#aaa] mt-1.5">{exp.period}</div>
+                    <div className="text-sm text-[#aaa] mt-1.5">{exp.duration}</div>
                   </div>
 
                   <div
@@ -116,7 +116,7 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
                       className="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full"
                       style={{ background: accentColor }}
                     />
-                    <h3 className="font-[600] text-[#1a1a1a] mb-4 text-lg">{exp.title}</h3>
+                    <h3 className="font-[600] text-[#1a1a1a] mb-4 text-lg">{exp.role}</h3>
                     <ul className="flex flex-col gap-2.5">
                       {exp.highlights.map((h, j) => (
                         <li key={j} className="text-sm text-[#666] flex gap-3 leading-relaxed">
@@ -136,7 +136,7 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
         )}
 
         {/* Projects */}
-        {content.projects.filter((p) => p.included).length > 0 && (
+        {content.projects.length > 0 && (
           <section id="work" className="pb-20">
             <p
               className="text-xs font-[700] tracking-[0.14em] uppercase mb-12"
@@ -145,17 +145,17 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
               Built things
             </p>
             <div className="grid md:grid-cols-2 gap-4">
-              {content.projects.filter((p) => p.included).map((p) => (
+              {content.projects.map((p) => (
                 <a
-                  key={p.id}
-                  href={p.url ?? "#"}
+                  key={p.name}
+                  href={p.github ?? "#"}
                   target="_blank"
                   rel="noreferrer"
                   className="group p-6 rounded-2xl transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5"
                   style={{ background: `${accentColor}07` }}
                 >
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-[600] text-[#1a1a1a] text-base">{p.title}</h3>
+                    <h3 className="font-[600] text-[#1a1a1a] text-base">{p.name}</h3>
                     <ExternalLink
                       className="h-4 w-4 shrink-0 mt-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
                       style={{ color: accentColor }}
@@ -163,7 +163,7 @@ export default function ProductTemplate({ name, accentColor, content }: Props) {
                   </div>
                   <p className="text-sm text-[#777] mb-5 leading-relaxed">{p.description}</p>
                   <div className="flex flex-wrap gap-1.5">
-                    {p.tags.map((t) => (
+                    {p.tech.map((t) => (
                       <span
                         key={t}
                         className="text-[10px] font-[700] tracking-[0.06em] uppercase px-2.5 py-1 rounded-md"
